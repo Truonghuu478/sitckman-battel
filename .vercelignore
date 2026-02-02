@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Testing
+tests/
+coverage/
+*.test.js
+jest.config.js
+
+# Documentation (optional - keep if you want docs on Vercel)
+TESTING_GUIDE.md
+INTEGRATION_PLAN.md
+PHASE1_COMPLETE.md
+UI_COMPARISON.md
+
+# Development files
+.git/
+.gitignore
+.DS_Store
+*.log
+
+# Source control
+stitch/
+
+# Keep these in deployment:
+# - index.html
+# - js/
+# - styles/
+# - vercel.json
+# - README.md
+# - DEPLOYMENT.md
