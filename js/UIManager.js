@@ -242,7 +242,8 @@ class UIManager {
      * Update HUD during gameplay with throttling
      */
     updateHUD(playerData, opponentData, gameState) {
-        // Throttle updates for performance (60fps max)\n        const now = performance.now();
+        // Throttle updates for performance (60fps max)
+        const now = performance.now();
         if (now - this.lastHUDUpdate < this.hudUpdateThrottle) {
             return;
         }

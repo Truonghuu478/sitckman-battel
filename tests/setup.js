@@ -48,5 +48,10 @@ global.cancelAnimationFrame = (id) => {
 };
 
 // Mock Date.now for consistent timing
+global.Date.now = jest.fn(() => 1609459200000);
+
+// Mock performance.now
+global.performance = global.performance || {};
+global.performance.now = jest.fn(() => Date.now());
 const originalDateNow = Date.now;
 global.Date.now = jest.fn(() => originalDateNow());
