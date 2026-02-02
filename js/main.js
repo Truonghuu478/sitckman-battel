@@ -133,11 +133,27 @@ window.addEventListener('DOMContentLoaded', () => {
         const element = document.getElementById(btn.id);
         if (element) {
             element.addEventListener('click', () => {
+                // Stop game if running
+                if (game.isRunning) {
+                    game.stop();
+                }
+                
+                // Hide all overlays first
                 btn.sources.forEach(source => source.classList.add('hidden'));
+                
+                // Show target menu
                 btn.target.classList.remove('hidden');
-                // Update menu stats when returning to main menu
+                
+                // Reset game state when going back to main menu
                 if (btn.target === mainMenu) {
                     game.updateMenuStats();
+                    game.reset();
+                    
+                    // Hide HUD when back to menu
+                    const gameHeader = document.getElementById('game-header');
+                    if (gameHeader) {
+                        gameHeader.classList.add('hidden');
+                    }
                 }
             });
         }

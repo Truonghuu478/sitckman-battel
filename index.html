@@ -73,7 +73,7 @@
             <div class="flex flex-col items-center justify-start -mt-2">
                 <div class="w-16 h-16 md:w-20 md:h-20 bg-slate-900/90 rounded-xl border-2 border-primary shadow-neon-primary flex items-center justify-center relative overflow-hidden backdrop-blur-md">
                     <div class="absolute inset-0 bg-primary/10 animate-pulse-fast"></div>
-                    <span class="text-3xl md:text-4xl font-black text-white leading-none z-10" id="timer">99</span>
+                    <span class="text-3xl md:text-4xl font-black text-white leading-none z-10" id="timer">180</span>
                 </div>
                 <div class="mt-2 px-3 py-1 bg-primary/20 border border-primary/40 rounded text-xs font-bold text-primary uppercase tracking-wider backdrop-blur-sm" id="stage-number">
                     Stage 1
@@ -321,7 +321,7 @@
                 
                 <!-- Back Button -->
                 <button class="btn-glass btn-base opacity-0 animate-fade-in-up stagger-2" id="backToMenuFromShop">
-                    <span class="material-icons text-lg mr-2">arrow_back</span>
+                    <span class="material-symbols-outlined text-lg mr-2">arrow_back</span>
                     Back to Menu
                 </button>
             </div>
@@ -406,6 +406,19 @@
     </div>
 
     <!-- Scripts -->
+    <!-- Player Components -->
+    <script src="js/components/PhysicsComponent.js"></script>
+    <script src="js/components/CombatComponent.js"></script>
+    <script src="js/components/ProjectileComponent.js"></script>
+    <script src="js/components/AnimationComponent.js"></script>
+    
+    <!-- Game Systems -->
+    <script src="js/core/GameEngine.js"></script>
+    <script src="js/systems/RenderSystem.js"></script>
+    <script src="js/systems/PowerUpSystem.js"></script>
+    <script src="js/systems/CombatSystem.js"></script>
+    
+    <!-- Core Classes -->
     <script src="js/UIManager.js"></script>
     <script src="js/ParticleSystem.js"></script>
     <script src="js/Player.js"></script>

@@ -213,6 +213,7 @@ describe('Player Class', () => {
         test('should apply attack power upgrade', () => {
             player.attackPowerLevel = 3;
             player.attackType = 'punch';
+            player.critChance = 0; // Disable crit for this test
             
             const baseDamage = 8;
             const expectedDamage = baseDamage + (3 * 2); // +2 per level
