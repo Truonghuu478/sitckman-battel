@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Fighter Upgrade Shop - Fluid UI</title>
+<link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#6467f2",
+                        "primary-glow": "#8a8dff",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#050507", 
+                        "surface-dark": "#16172d",
+                        "surface-glass": "rgba(22, 23, 45, 0.6)",
+                    },
+                    fontFamily: {
+                        "display": ["Spline Sans", "sans-serif"],
+                        "mono": ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", "monospace"],
+                    },
+                    boxShadow: {
+                        'neon': '0 0 10px rgba(100, 103, 242, 0.5), 0 0 20px rgba(100, 103, 242, 0.3)',
+                        'neon-hover': '0 0 15px rgba(100, 103, 242, 0.7), 0 0 30px rgba(100, 103, 242, 0.5)',
+                        'deep': '0 15px 40px -10px rgba(0, 0, 0, 0.8)',
+                    },
+                    animation: {
+                        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-5px)' },
+                        },
+                        glow: {
+                            'from': { boxShadow: '0 0 5px rgba(100, 103, 242, 0.2)' },
+                            'to': { boxShadow: '0 0 20px rgba(100, 103, 242, 0.6)' },
+                        }
+                    }
+                },
+            },
+        }
+    </script>
+<style>::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a12;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #323367;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6467f2;
+        }
+        .glass-panel {
+            background: rgba(20, 21, 40, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-white antialiased selection:bg-primary selection:text-white">
+<div class="relative flex h-screen w-full flex-col overflow-hidden">
+<div class="absolute inset-0 bg-[url('https://placeholder.pics/svg/20')] opacity-[0.02] pointer-events-none z-0"></div>
+<div class="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-primary/5 blur-[150px] pointer-events-none z-0 animate-pulse-fast"></div>
+<div class="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] rounded-full bg-purple-600/5 blur-[150px] pointer-events-none z-0"></div>
+<header class="relative z-20 flex items-center justify-between whitespace-nowrap border-b border-white/5 bg-background-dark/80 backdrop-blur-xl px-6 lg:px-10 py-4 shadow-lg">
+<div class="flex items-center gap-4 text-white">
+<div class="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary/30 to-primary/10 text-primary shadow-neon border border-primary/20">
+<span class="material-symbols-outlined text-2xl drop-shadow-[0_0_8px_rgba(100,103,242,0.8)]">bolt</span>
+</div>
+<div>
+<h2 class="text-white text-xl font-bold leading-tight tracking-wider uppercase drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]">Upgrade Station</h2>
+<p class="text-xs text-primary font-medium tracking-[0.2em] opacity-80">UNIT: AX-09 // ONLINE</p>
+</div>
+</div>
+<div class="flex flex-1 justify-end items-center gap-6">
+<nav class="hidden md:flex items-center gap-8 mr-4">
+<a class="text-slate-400 hover:text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] text-sm font-medium transition-colors duration-300" href="#">Lobby</a>
+<a class="text-primary font-bold drop-shadow-[0_0_8px_rgba(100,103,242,0.8)] text-sm leading-normal border-b-2 border-primary pb-1" href="#">Armory</a>
+<a class="text-slate-400 hover:text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] text-sm font-medium transition-colors duration-300" href="#">Missions</a>
+</nav>
+<div class="group relative overflow-hidden rounded-xl bg-surface-dark border border-primary/30 p-[1px] shadow-neon hover:shadow-neon-hover transition-shadow duration-500">
+<div class="absolute inset-0 bg-gradient-to-r from-primary/20 via-white/5 to-primary/20 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+<div class="relative flex h-10 items-center justify-center gap-3 bg-background-dark/90 px-6 rounded-[11px] backdrop-blur-md">
+<span class="material-symbols-outlined text-yellow-400 text-xl drop-shadow-[0_0_8px_rgba(250,204,21,0.6)]">monetization_on</span>
+<span class="text-white text-lg font-bold tracking-widest tabular-nums font-mono drop-shadow-md">9,450 ₵</span>
+<div class="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e] animate-pulse"></div>
+</div>
+</div>
+<div class="relative h-11 w-11 rounded-full border-2 border-primary/50 shadow-neon overflow-hidden hidden sm:block ring-2 ring-transparent hover:ring-primary/40 transition-all duration-300">
+<img alt="Cyberpunk neon warrior avatar portrait" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5jPpVKtLsCHsN4PwqmCKtG-GtyjHm-XN4VbgoSBnk7WYdDGQfR8OcszDeI1EQAo7FHpXo4nUz-S9ZigUxhI267b-BmS8wTS_y_W0DjUdn2gldKR2fWrsaqOyVIX0ttsgXhkY2g0-yZhCKtkEoZtnKshjyxFW5Fl202Oa9q_tMh4CYlSV6Ts4Sco-1f31JIK-wiYAvpXXKyTpKUDWjMD395p_DjR-EOdy5oC2jSVu6kWkhtX4dPWV36nfAFBAVqczTgemndD6ceIs"/>
+</div>
+</div>
+</header>
+<main class="relative z-10 flex flex-1 overflow-hidden">
+<div class="flex-1 flex flex-col h-full overflow-y-auto w-full max-w-[1600px] mx-auto scroll-smooth">
+<div class="px-6 lg:px-12 py-10 flex flex-col md:flex-row justify-between items-end gap-6 border-b border-white/5 pb-8 mb-6 bg-gradient-to-b from-white/0 to-white/[0.02]">
+<div class="flex flex-col gap-3">
+<h1 class="text-white text-4xl lg:text-5xl font-black tracking-tight uppercase drop-shadow-[0_0_25px_rgba(100,103,242,0.5)]">
+                            System Upgrades
+                        </h1>
+<p class="text-slate-400 text-lg max-w-xl font-light">
+                            Enhance combat capabilities. <span class="text-primary font-medium">Select a module</span> to view detailed stats.
+                        </p>
+</div>
+<div class="flex gap-3 overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
+<button class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-primary text-white shadow-neon px-5 font-bold text-sm transition-all hover:scale-105 hover:bg-primary-glow active:scale-95">
+<span class="material-symbols-outlined text-lg">grid_view</span>
+                            All Systems
+                        </button>
+<button class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-surface-dark border border-white/10 hover:border-red-500/50 text-slate-300 hover:text-white px-5 text-sm font-medium transition-all hover:bg-red-500/10 hover:shadow-[0_0_15px_rgba(239,68,68,0.2)]">
+<span class="material-symbols-outlined text-lg text-red-400">swords</span>
+                            Offense
+                        </button>
+<button class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-surface-dark border border-white/10 hover:border-blue-500/50 text-slate-300 hover:text-white px-5 text-sm font-medium transition-all hover:bg-blue-500/10 hover:shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+<span class="material-symbols-outlined text-lg text-blue-400">shield</span>
+                            Defense
+                        </button>
+<button class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-surface-dark border border-white/10 hover:border-green-500/50 text-slate-300 hover:text-white px-5 text-sm font-medium transition-all hover:bg-green-500/10 hover:shadow-[0_0_15px_rgba(34,197,94,0.2)]">
+<span class="material-symbols-outlined text-lg text-green-400">construction</span>
+                            Utility
+                        </button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8 px-6 lg:px-12 pb-20">
+<div class="group relative rounded-2xl glass-panel shadow-deep overflow-visible transition-all duration-500 ease-out hover:scale-[1.02] hover:shadow-neon ring-1 ring-primary/40 z-10 flex flex-col h-full">
+<div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-red-500 to-transparent shadow-[0_0_10px_#ef4444] animate-pulse"></div>
+<div class="relative h-52 w-full overflow-hidden bg-black/40 rounded-t-2xl">
+<div class="absolute inset-0 bg-gradient-to-t from-[#141528] to-transparent z-10"></div>
+<img class="h-full w-full object-cover opacity-90 group-hover:scale-110 transition-transform duration-700 ease-in-out" data-alt="Cyberpunk red neon sword slashing effect" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAryoKWSZC-HtkjfsW5fShvopOd9CDPW9eB8rV32bK4v8eKbxpYFtIQmXXbXgK_ex3kCUuXK-lcF49YRbq2OM93mUzvh9PQSY32t0xlMWJT-TCeJl4nn7CaVl_iCMBLPu61a_zJRlhBGeDKgL_dUX-HGhWcXShDRwwuiNNuhgo3ZwgaK0ZTS_N4zjfsXyDPgjaob1YUaZ_TgZGqcqBoCTBxc07LnHnWnFCdT0H_gwUvy2zzXESL1SMxbl5BOLgJ9xuIUB3zBS8kd_s"/>
+<div class="absolute top-4 right-4 z-20 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-lg text-xs font-bold text-red-400 border border-red-500/30 flex items-center gap-1.5 shadow-lg">
+<span class="material-symbols-outlined text-sm">swords</span> OFFENSE
+                            </div>
+<div class="absolute bottom-4 right-4 z-30 pointer-events-none">
+<div class="absolute w-1 h-1 bg-white rounded-full shadow-[0_0_8px_white] animate-[ping_1s_cubic-bezier(0,0,0.2,1)_infinite]"></div>
+<div class="absolute -top-6 -left-8 w-1 h-1 bg-red-400 rounded-full opacity-60"></div>
+<div class="absolute -top-3 -left-12 w-1.5 h-1.5 bg-primary rounded-full opacity-80 blur-[1px]"></div>
+<div class="absolute top-2 -left-10 w-1 h-1 bg-purple-400 rounded-full opacity-70"></div>
+</div>
+</div>
+<div class="p-6 flex flex-col flex-grow">
+<div class="flex justify-between items-start mb-3">
+<h3 class="text-2xl font-bold text-white tracking-wide group-hover:text-primary-glow transition-colors">Plasma Strike</h3>
+<div class="text-xs font-mono text-primary bg-primary/10 px-2 py-1 rounded border border-primary/20">MK-IV</div>
+</div>
+<p class="text-slate-400 text-sm mb-6 leading-relaxed line-clamp-2 group-hover:text-slate-300 transition-colors">
+                                Increases melee damage output by superheating weapon edges with ionized plasma.
+                            </p>
+<div class="mt-auto space-y-5">
+<div class="flex justify-between text-xs font-bold uppercase tracking-widest text-slate-300 mb-1">
+<span>Level Progress</span>
+<span class="text-primary tabular-nums">4 <span class="text-slate-600">/</span> 10</span>
+</div>
+<div class="h-2.5 w-full bg-slate-800/80 rounded-full overflow-hidden border border-white/5">
+<div class="h-full bg-gradient-to-r from-primary via-purple-500 to-primary bg-[length:200%_100%] animate-[shimmer_2s_infinite_linear] w-[40%] shadow-[0_0_15px_rgba(100,103,242,0.6)] relative transition-all duration-1000 ease-out group-hover:w-[42%]">
+<div class="absolute right-0 top-0 bottom-0 w-0.5 bg-white shadow-[0_0_10px_white]"></div>
+</div>
+</div>
+<div class="flex justify-between items-center text-xs font-mono">
+<span class="text-slate-400">Current: <span class="text-white">+12% DMG</span></span>
+<span class="text-green-400 font-bold flex items-center gap-1 bg-green-500/10 px-2 py-0.5 rounded border border-green-500/20">
+                                        Next: +15% <span class="material-symbols-outlined text-xs animate-bounce">arrow_upward</span>
+</span>
+</div>
+<div class="pt-5 border-t border-white/10 flex items-center justify-between gap-4">
+<div class="text-white font-bold text-xl tabular-nums tracking-tight">500 ₵</div>
+<button class="relative overflow-hidden flex-1 bg-primary hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-xl shadow-[0_0_20px_rgba(100,103,242,0.4)] transition-all active:scale-[0.98] group/btn">
+<div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover/btn:animate-[shimmer_1.5s_infinite]"></div>
+<span class="relative z-10 flex items-center justify-center gap-2 tracking-wider text-sm">
+                                            UPGRADE
+                                        </span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="group relative rounded-2xl glass-panel shadow-deep overflow-hidden transition-all duration-500 ease-out hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(59,130,246,0.25)] flex flex-col h-full border border-white/5 hover:border-blue-500/30">
+<div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50 group-hover:opacity-100 transition-opacity"></div>
+<div class="relative h-52 w-full overflow-hidden bg-black/40">
+<div class="absolute inset-0 bg-gradient-to-t from-[#141528] to-transparent z-10"></div>
+<img class="h-full w-full object-cover opacity-80 group-hover:scale-110 transition-transform duration-700 ease-in-out" data-alt="Abstract blue motion trails and speed lines" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAicbiAeyCno061WuTIX_Y86uriTQzlUPC2iZs-KXfRbM-Y9MBsye798tBO406vV9aH6CtoqK9s8E9hoSQkxbe2xzO4B5_1wHazorNMPCQ22i1aOc5phyKEj5hCZHn-09HC-_DGJUoypGIL_5A-2NjPf3TM_Y2PhTzViKkP_vyV8PTnFWiZvCG-EN-vMtIU8yGtbt2dLOT4z4YFc5CWsiIh87W7lz34wNHYwcFA5MruvABeUlJ6a5ELLLcpQh17eAn-GEguyqAoFvQ"/>
+<div class="absolute top-4 right-4 z-20 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-lg text-xs font-bold text-blue-400 border border-blue-500/30 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">sprint</span> AGILITY
+                            </div>
+</div>
+<div class="p-6 flex flex-col flex-grow">
+<div class="flex justify-between items-start mb-3">
+<h3 class="text-2xl font-bold text-white tracking-wide group-hover:text-blue-400 transition-colors">Dash Recovery</h3>
+<div class="text-xs font-mono text-slate-500 border border-white/5 px-2 py-1 rounded">V2.0</div>
+</div>
+<p class="text-slate-400 text-sm mb-6 leading-relaxed line-clamp-2">
+                                Reduces downtime between tactical dashes by optimizing neural pathways.
+                            </p>
+<div class="mt-auto space-y-5">
+<div class="flex justify-between text-xs font-bold uppercase tracking-widest text-slate-300 mb-1">
+<span>Level Progress</span>
+<span class="text-blue-400 tabular-nums">7 <span class="text-slate-600">/</span> 10</span>
+</div>
+<div class="h-2.5 w-full bg-slate-800/80 rounded-full overflow-hidden border border-white/5">
+<div class="h-full bg-gradient-to-r from-blue-600 to-cyan-400 w-[70%] shadow-[0_0_10px_rgba(59,130,246,0.6)] relative transition-all duration-1000 ease-out group-hover:w-[72%]">
+<div class="absolute right-0 top-0 bottom-0 w-0.5 bg-white opacity-50"></div>
+</div>
+</div>
+<div class="flex justify-between items-center text-xs font-mono">
+<span class="text-slate-400">Current: <span class="text-white">-1.2s CD</span></span>
+<span class="text-green-400 font-bold flex items-center gap-1">Next: -1.5s <span class="material-symbols-outlined text-xs">arrow_upward</span></span>
+</div>
+<div class="pt-5 border-t border-white/10 flex items-center justify-between gap-4">
+<div class="text-white font-bold text-xl tabular-nums tracking-tight">1,200 ₵</div>
+<button class="relative overflow-hidden flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-xl shadow-[0_0_15px_rgba(37,99,235,0.4)] transition-all active:scale-[0.98] group/btn">
+<span class="relative z-10 flex items-center justify-center gap-2 tracking-wider text-sm">UPGRADE</span>
+<div class="absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300"></div>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="group relative rounded-2xl glass-panel shadow-deep overflow-hidden transition-all duration-500 ease-out hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(168,85,247,0.25)] flex flex-col h-full ring-1 ring-purple-500/10 hover:ring-purple-500/30">
+<div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-purple-500 to-transparent opacity-50"></div>
+<div class="relative h-52 w-full overflow-hidden bg-black/40">
+<div class="absolute inset-0 bg-gradient-to-t from-[#141528] to-transparent z-10"></div>
+<img class="h-full w-full object-cover opacity-80 group-hover:scale-110 transition-transform duration-700 ease-in-out saturate-150" data-alt="Purple laser beams exploding in geometric pattern" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDldzuVdr8Bt2FHHZ0kCrNPwRmFw7tDt1QI2U7vf4w-tqXU8BaovBwslfCaWl7BV6e1US37usRjbly3QouNEdL5cwRO__CqNF_MaG2W1BO4YJOhVjkUBHodcP4aLRLNGUs0V2UsG-WMBppRg1utA_Ij1h-jTCpjWl3KhyvlZ9XnPFCoFkQb2WgvogQkWI2aK-ux0BemJcFBmpDjhwkx65Y4NuKL98GkBw_RRyngtbko0b_47Bl2jxMl-ne_jSmtK-YNHYdvCcArZBI"/>
+<div class="absolute top-4 right-4 z-20 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-lg text-xs font-bold text-purple-400 border border-purple-500/30 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">stars</span> ULTIMATE
+                            </div>
+</div>
+<div class="p-6 flex flex-col flex-grow">
+<div class="flex justify-between items-start mb-3">
+<h3 class="text-2xl font-bold text-white tracking-wide group-hover:text-purple-400 transition-colors">Neon Overdrive</h3>
+<div class="text-xs font-mono text-purple-300 border border-purple-500/20 bg-purple-500/10 px-2 py-1 rounded">MAX</div>
+</div>
+<p class="text-slate-400 text-sm mb-6 leading-relaxed line-clamp-2">
+                                Unleash a devastating area-of-effect blast that stuns all nearby enemies.
+                            </p>
+<div class="mt-auto space-y-5">
+<div class="flex justify-between text-xs font-bold uppercase tracking-widest text-slate-300 mb-1">
+<span>Level Progress</span>
+<span class="text-purple-400 tabular-nums">1 <span class="text-slate-600">/</span> 5</span>
+</div>
+<div class="h-2.5 w-full bg-slate-800/80 rounded-full overflow-hidden border border-white/5">
+<div class="h-full bg-gradient-to-r from-purple-600 to-fuchsia-400 w-[20%] shadow-[0_0_10px_rgba(168,85,247,0.6)] relative transition-all duration-1000 ease-out">
+<div class="absolute right-0 top-0 bottom-0 w-0.5 bg-white opacity-50"></div>
+</div>
+</div>
+<div class="flex justify-between items-center text-xs font-mono">
+<span class="text-slate-400">Effect: <span class="text-white">3s Stun</span></span>
+<span class="text-slate-500 font-bold flex items-center gap-1">Next: LOCKED <span class="material-symbols-outlined text-xs">lock</span></span>
+</div>
+<div class="pt-5 border-t border-white/10 flex items-center justify-between gap-4">
+<div class="text-slate-500 font-bold text-xl tabular-nums tracking-tight">5,000 ₵</div>
+<button class="relative overflow-hidden flex-1 bg-slate-800/50 text-slate-500 font-bold py-3 px-4 rounded-xl cursor-not-allowed border border-white/5 transition-colors" disabled="">
+<span class="relative z-10 flex items-center justify-center gap-2 tracking-wider text-sm">
+<span class="material-symbols-outlined text-sm">lock</span> LOCKED
+                                        </span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="group relative rounded-2xl glass-panel shadow-deep overflow-hidden transition-all duration-500 ease-out hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(34,197,94,0.25)] flex flex-col h-full border border-white/5 hover:border-green-500/30">
+<div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-green-500 to-transparent opacity-50 group-hover:opacity-100 transition-opacity"></div>
+<div class="relative h-52 w-full overflow-hidden bg-black/40">
+<div class="absolute inset-0 bg-gradient-to-t from-[#141528] to-transparent z-10"></div>
+<img class="h-full w-full object-cover opacity-80 group-hover:scale-110 transition-transform duration-700 ease-in-out" data-alt="Green hexagonal forcefield barrier texture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrwU70Z90L9QmD9c-3v72XMO8QHalh0M5x4DBkN02wEWw6qePftJ5CsZEiK4KQZyMpRluyQjO1BUOQ4ntrsvWQYXpZ96OnZDV7lnxGav7yvsAhaha6DU5sY9AyR2sne4r4y2_sY3WCT6jJS2W-tA3muG8_0jS2nF8nrF1l4f1wqpx14SIEEigr5LkzI8TA2sZcGObRc1BxmMjc-CxmwIBKlELdODorpahVEHeAsdFdAF99R2KbMNygabZcJ0p7lMw5jwGsGxzXF5o"/>
+<div class="absolute top-4 right-4 z-20 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-lg text-xs font-bold text-green-400 border border-green-500/30 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">shield</span> DEFENSE
+                            </div>
+</div>
+<div class="p-6 flex flex-col flex-grow">
+<div class="flex justify-between items-start mb-3">
+<h3 class="text-2xl font-bold text-white tracking-wide group-hover:text-green-400 transition-colors">Nanite Armor</h3>
+<div class="text-xs font-mono text-slate-500 border border-white/5 px-2 py-1 rounded">MK-II</div>
+</div>
+<p class="text-slate-400 text-sm mb-6 leading-relaxed line-clamp-2">
+                                Automatically repairs minor damage and increases overall damage resistance.
+                            </p>
+<div class="mt-auto space-y-5">
+<div class="flex justify-between text-xs font-bold uppercase tracking-widest text-slate-300 mb-1">
+<span>Level Progress</span>
+<span class="text-green-400 tabular-nums">2 <span class="text-slate-600">/</span> 10</span>
+</div>
+<div class="h-2.5 w-full bg-slate-800/80 rounded-full overflow-hidden border border-white/5">
+<div class="h-full bg-gradient-to-r from-green-600 to-emerald-400 w-[20%] shadow-[0_0_10px_rgba(34,197,94,0.6)] relative transition-all duration-1000 ease-out group-hover:w-[22%]">
+<div class="absolute right-0 top-0 bottom-0 w-0.5 bg-white opacity-50"></div>
+</div>
+</div>
+<div class="flex justify-between items-center text-xs font-mono">
+<span class="text-slate-400">Current: <span class="text-white">+5% RES</span></span>
+<span class="text-green-400 font-bold flex items-center gap-1">Next: +8% <span class="material-symbols-outlined text-xs">arrow_upward</span></span>
+</div>
+<div class="pt-5 border-t border-white/10 flex items-center justify-between gap-4">
+<div class="text-white font-bold text-xl tabular-nums tracking-tight">800 ₵</div>
+<button class="relative overflow-hidden flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-4 rounded-xl shadow-[0_0_15px_rgba(22,163,74,0.4)] transition-all active:scale-[0.98] group/btn">
+<span class="relative z-10 flex items-center justify-center gap-2 tracking-wider text-sm">UPGRADE</span>
+<div class="absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300"></div>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="group relative rounded-2xl glass-panel shadow-deep overflow-hidden transition-all duration-500 ease-out hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(249,115,22,0.25)] flex flex-col h-full border border-white/5 hover:border-orange-500/30">
+<div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-orange-500 to-transparent opacity-50 group-hover:opacity-100 transition-opacity"></div>
+<div class="relative h-52 w-full overflow-hidden bg-black/40">
+<div class="absolute inset-0 bg-gradient-to-t from-[#141528] to-transparent z-10"></div>
+<img class="h-full w-full object-cover opacity-80 group-hover:scale-110 transition-transform duration-700 ease-in-out" data-alt="Orange digital scan lines and radar interface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAq7t9Sv98q4dGiB6PajEQOtSy5Tu3nXVBIGjlQYRWylebBfvzxivcHRVoUvj81_2CCTLrEUpHZbyM_fTaWd0_oS9tS7R-m4CykMowHcEOQKYxbO5ixVuag5jtXE4o7SFxSqf1GPfjvTLaDlZuuii3v5MYXc2zLTw-_XW57x7nuCR-dqBFvdFcx2b7Pd0JqHRXyXBCUqe4qGWEa5_wo_3Vbb8ZyMsgWAeuRN7q394_lsx64WzryopxfaSa79nG1n1ra2j_OMyqMWFc"/>
+<div class="absolute top-4 right-4 z-20 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-lg text-xs font-bold text-orange-400 border border-orange-500/30 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">construction</span> UTILITY
+                            </div>
+</div>
+<div class="p-6 flex flex-col flex-grow">
+<div class="flex justify-between items-start mb-3">
+<h3 class="text-2xl font-bold text-white tracking-wide group-hover:text-orange-400 transition-colors">Loot Scanner</h3>
+<div class="text-xs font-mono text-slate-500 border border-white/5 px-2 py-1 rounded">V1.5</div>
+</div>
+<p class="text-slate-400 text-sm mb-6 leading-relaxed line-clamp-2">
+                                Reveals hidden item caches and increases currency drop rate from enemies.
+                            </p>
+<div class="mt-auto space-y-5">
+<div class="flex justify-between text-xs font-bold uppercase tracking-widest text-slate-300 mb-1">
+<span>Level Progress</span>
+<span class="text-orange-400 tabular-nums">5 <span class="text-slate-600">/</span> 10</span>
+</div>
+<div class="h-2.5 w-full bg-slate-800/80 rounded-full overflow-hidden border border-white/5">
+<div class="h-full bg-gradient-to-r from-orange-600 to-amber-400 w-[50%] shadow-[0_0_10px_rgba(249,115,22,0.6)] relative transition-all duration-1000 ease-out group-hover:w-[52%]">
+<div class="absolute right-0 top-0 bottom-0 w-0.5 bg-white opacity-50"></div>
+</div>
+</div>
+<div class="flex justify-between items-center text-xs font-mono">
+<span class="text-slate-400">Current: <span class="text-white">+10% Drops</span></span>
+<span class="text-green-400 font-bold flex items-center gap-1">Next: +12% <span class="material-symbols-outlined text-xs">arrow_upward</span></span>
+</div>
+<div class="pt-5 border-t border-white/10 flex items-center justify-between gap-4">
+<div class="text-white font-bold text-xl tabular-nums tracking-tight">2,100 ₵</div>
+<button class="relative overflow-hidden flex-1 bg-orange-600 hover:bg-orange-500 text-white font-bold py-3 px-4 rounded-xl shadow-[0_0_15px_rgba(234,88,12,0.4)] transition-all active:scale-[0.98] group/btn">
+<span class="relative z-10 flex items-center justify-center gap-2 tracking-wider text-sm">UPGRADE</span>
+<div class="absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300"></div>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="group relative rounded-2xl glass-panel shadow-deep overflow-hidden transition-all duration-500 hover:scale-[1.02] flex flex-col h-full opacity-60 hover:opacity-100 border border-white/5">
+<div class="absolute top-0 left-0 w-full h-[2px] bg-white/10"></div>
+<div class="relative h-52 w-full overflow-hidden bg-black/40 flex items-center justify-center">
+<div class="absolute inset-0 bg-gradient-to-t from-[#141528] to-transparent z-10"></div>
+<span class="material-symbols-outlined text-6xl text-slate-700 z-0 group-hover:text-slate-500 transition-colors">lock_clock</span>
+<div class="absolute top-4 right-4 z-20 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 border border-slate-500/30 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">schedule</span> ???
+                            </div>
+</div>
+<div class="p-6 flex flex-col flex-grow items-center justify-center text-center">
+<h3 class="text-xl font-bold text-white tracking-wide mb-3">Classified Tech</h3>
+<p class="text-slate-500 text-sm mb-6 max-w-[200px]">
+                                Unlock Level 20 to reveal this upgrade tree.
+                            </p>
+<button class="w-full bg-white/5 text-slate-500 font-bold py-3 px-4 rounded-xl border border-white/5 cursor-not-allowed transition-colors hover:bg-white/10" disabled="">
+                                LOCKED
+                            </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>
