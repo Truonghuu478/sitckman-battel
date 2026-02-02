@@ -132,8 +132,14 @@ class Player {
     }
     
     onHit(opponent) {
-        const damage = this.attackType === 'punch' ? 8 : 12;
-        opponent.takeDamage(damage);
+        let baseDamage = this.attackType === 'punch' ? 8 : 12;
+        
+        // Apply attack power upgrade if exists
+        if (this.attackPowerLevel) {
+            baseDamage += (this.attackPowerLevel * 2);
+        }
+        
+        opponent.takeDamage(baseDamage, this.attackPowerLevel || 0);
         
         // Knockback
         const knockbackForce = this.attackType === 'punch' ? 8 : 12;
@@ -144,8 +150,15 @@ class Player {
         this.hitbox = null;
     }
     
-    takeDamage(amount) {
-        this.health = Math.max(0, this.health - amount);
+    takeDamage(amount, attackerPowerLevel = 0) {
+        // Apply defense if exists
+        let finalDamage = amount;
+        if (this.defenseLevel) {
+            const reduction = this.defenseLevel * 0.1; // 10% per level
+            finalDamage = Math.ceil(amount * (1 - reduction));
+        }
+        
+        this.health = Math.max(0, this.health - finalDamage);
         this.hitFlash = 10;
         this.hitStun = 15;
         

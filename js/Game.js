@@ -11,6 +11,7 @@ class Game {
         this.isRunning = false;
         this.isPaused = false;
         this.gameOver = false;
+        this.gameMode = null; // 'campaign' or 'vs'
         
         // Ground level
         this.groundY = this.height - 50;
@@ -22,20 +23,13 @@ class Game {
         this.particleSystem = new ParticleSystem();
         this.shockwaves = [];
         
-        // Players
-        this.player1 = new Player(
-            150, 
-            this.groundY - 80, 
-            '#ff4444',
-            this.inputHandler.getPlayer1Controls()
-        );
+        // Campaign manager
+        this.campaignManager = new CampaignManager();
+        this.aiController = null;
         
-        this.player2 = new Player(
-            this.width - 150, 
-            this.groundY - 80, 
-            '#4444ff',
-            this.inputHandler.getPlayer2Controls()
-        );
+        // Players
+        this.player1 = null;
+        this.player2 = null;
         
         // Timer
         this.timeLimit = 99;
@@ -55,19 +49,43 @@ class Game {
         this.fps = 60;
     }
     
-    start() {
-        this.isRunning = true;
-        this.gameOver = false;
-        this.reset();
-        this.gameLoop();
+    startCampaign() {
+        this.gameMode = 'campaign';
+        const stage = this.campaignManager.getCurrentStage();
+        
+        // Create player 1 with upgrades
+        this.player1 = new Player(
+            150, 
+            this.groundY - 80, 
+            '#ff4444',
+            this.inputHandler.getPlayer1Controls()
+        );
+        this.campaignManager.applyUpgradesToPlayer(this.player1);
+        
+        // Create AI opponent
+        this.player2 = new Player(
+            this.width - 150, 
+            this.groundY - 80, 
+            stage.opponent.color,
+            this.inputHandler.getPlayer2Controls()
+        );
+        
+        // Set opponent health
+        if (stage.opponent.health) {
+            this.player2.maxHealth = stage.opponent.health;
+            this.player2.health = stage.opponent.health;
+        }
+        
+        // Create AI controller
+        this.aiController = new AIController(this.player2, this.player1, stage.opponent.difficulty);
+        
+        this.start();
     }
     
-    stop() {
-        this.isRunning = false;
-    }
-    
-    reset() {
-        // Reset players
+    startVsMode() {
+        this.gameMode = 'vs';
+        this.aiController = null;
+        
         this.player1 = new Player(
             150, 
             this.groundY - 80, 
@@ -82,6 +100,21 @@ class Game {
             this.inputHandler.getPlayer2Controls()
         );
         
+        this.start();
+    }
+    
+    start() {
+        this.isRunning = true;
+        this.gameOver = false;
+        this.resetTimers();
+        this.gameLoop();
+    }
+    
+    stop() {
+        this.isRunning = false;
+    }
+    
+    resetTimers() {
         // Reset timer
         this.timeRemaining = this.timeLimit;
         this.lastSecond = Date.now();
@@ -98,6 +131,16 @@ class Game {
         // Update UI
         this.updateHealthBars();
         this.updateTimer();
+        this.updateCoins();
+    }
+    
+    reset() {
+        // Reset players based on mode
+        if (this.gameMode === 'campaign') {
+            this.startCampaign();
+        } else {
+            this.startVsMode();
+        }
     }
     
     gameLoop() {
@@ -127,8 +170,17 @@ class Game {
         this.player2WasGrounded = this.player2.isGrounded;
         
         // Handle input
-        this.inputHandler.handlePlayerInput(this.player1, this.player1.controls);
-        this.inputHandler.handlePlayerInput(this.player2, this.player2.controls);
+        if (this.gameMode === 'campaign') {
+            // Player 1 controlled by user, Player 2 by AI
+            this.inputHandler.handlePlayerInput(this.player1, this.player1.controls);
+            if (this.aiController) {
+                this.aiController.update();
+            }
+        } else {
+            // Both players controlled by users
+            this.inputHandler.handlePlayerInput(this.player1, this.player1.controls);
+            this.inputHandler.handlePlayerInput(this.player2, this.player2.controls);
+        }
         
         // Update players
         const player1HadHitbox = this.player1.hitbox !== null;
@@ -402,40 +454,79 @@ class Game {
         }
     }
     
+    updateCoins() {
+        const coinsElement = document.getElementById('coins');
+        if (coinsElement) {
+            coinsElement.textContent = this.campaignManager.playerStats.coins;
+        }
+    }
+    
     endGame() {
         this.gameOver = true;
         this.isRunning = false;
         
-        // Determine winner
-        let winner = '';
-        if (this.player1.health > this.player2.health) {
-            winner = 'Player 1 Thắng!';
-        } else if (this.player2.health > this.player1.health) {
-            winner = 'Player 2 Thắng!';
+        if (this.gameMode === 'campaign') {
+            // Campaign mode - show victory or defeat
+            if (this.player1.health > 0) {
+                // Victory
+                const reward = this.campaignManager.completeStage();
+                this.showVictory(reward);
+            } else {
+                // Defeat
+                this.showDefeat();
+            }
         } else {
-            winner = 'Hòa!';
+            // VS mode - determine winner
+            let winner = '';
+            if (this.player1.health > this.player2.health) {
+                winner = 'Player 1 Thắng!';
+            } else if (this.player2.health > this.player1.health) {
+                winner = 'Player 2 Thắng!';
+            } else {
+                winner = 'Hòa!';
+            }
+            this.showGameOver(winner);
         }
-        
-        // Show game over screen
-        this.showGameOver(winner);
+    }
+    
+    showVictory(reward) {
+        const screen = document.getElementById('victoryScreen');
+        document.getElementById('rewardAmount').textContent = `+${reward} 💰`;
+        document.getElementById('totalCoins').textContent = this.campaignManager.playerStats.coins;
+        screen.classList.remove('hidden');
+    }
+    
+    showDefeat() {
+        const screen = document.getElementById('defeatScreen');
+        screen.classList.remove('hidden');
     }
     
     showGameOver(winner) {
-        const overlay = document.getElementById('gameOverlay');
-        const menu = overlay.querySelector('.menu');
+        // For VS mode
+        const vsMode = document.getElementById('vsMode');
+        const menu = vsMode.querySelector('.menu');
         
+        const oldContent = menu.innerHTML;
         menu.innerHTML = `
             <h1 class="game-over-message">GAME OVER</h1>
             <div class="winner-text">${winner}</div>
-            <button class="btn-start" id="restartBtn">Chơi Lại</button>
+            <button class="btn-start" id="restartVsBtn">Chơi Lại</button>
+            <button class="btn-back" id="backToMenuFromGameOver">← Menu</button>
         `;
         
-        overlay.classList.remove('hidden');
+        vsMode.classList.remove('hidden');
         
-        // Setup restart button
-        document.getElementById('restartBtn').addEventListener('click', () => {
-            overlay.classList.add('hidden');
-            this.start();
+        // Setup buttons
+        document.getElementById('restartVsBtn').addEventListener('click', () => {
+            vsMode.classList.add('hidden');
+            menu.innerHTML = oldContent;
+            this.startVsMode();
+        });
+        
+        document.getElementById('backToMenuFromGameOver').addEventListener('click', () => {
+            vsMode.classList.add('hidden');
+            menu.innerHTML = oldContent;
+            document.getElementById('mainMenu').classList.remove('hidden');
         });
     }
 }
