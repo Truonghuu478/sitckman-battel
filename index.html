@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Người Que Đối Kháng</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <div class="player-info player1-info">
+                <div class="player-name">Player 1</div>
+                <div class="health-bar">
+                    <div class="health-fill" id="player1-health"></div>
+                </div>
+                <div class="controls-hint">WASD + F/G</div>
+            </div>
+            <div class="timer" id="timer">99</div>
+            <div class="player-info player2-info">
+                <div class="player-name">Player 2</div>
+                <div class="health-bar">
+                    <div class="health-fill" id="player2-health"></div>
+                </div>
+                <div class="controls-hint">Arrow Keys + 1/2</div>
+            </div>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+        <div class="game-overlay" id="gameOverlay">
+            <div class="menu">
+                <h1>NGƯỜI QUE ĐỐI KHÁNG</h1>
+                <button class="btn-start" id="startBtn">Bắt Đầu</button>
+                <div class="instructions">
+                    <h3>Hướng dẫn chơi:</h3>
+                    <div class="instruction-row">
+                        <div>
+                            <strong>Player 1:</strong><br>
+                            W/S: Nhảy/Ngồi<br>
+                            A/D: Di chuyển<br>
+                            F: Đấm<br>
+                            G: Đá
+                        </div>
+                        <div>
+                            <strong>Player 2:</strong><br>
+                            ↑/↓: Nhảy/Ngồi<br>
+                            ←/→: Di chuyển<br>
+                            1: Đấm<br>
+                            2: Đá
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/ParticleSystem.js"></script>
+    <script src="js/Player.js"></script>
+    <script src="js/InputHandler.js"></script>
+    <script src="js/Game.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
