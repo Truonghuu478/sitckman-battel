@@ -38,6 +38,27 @@ class Player {
         this.hitFlash = 0;
         this.hitStun = 0;
         
+        // NEW: Knockdown effect
+        this.isKnockedDown = false;
+        this.knockdownTime = 0;
+        this.getUpFrame = 0;
+        
+        // NEW: Projectiles (stones)
+        this.projectiles = [];
+        this.stoneCooldown = 0;
+        this.maxStones = 3;
+        this.stoneCount = 3;
+        
+        // NEW: Dash ability
+        this.isDashing = false;
+        this.dashFrame = 0;
+        this.dashCooldown = 0;
+        this.dashSpeed = 15;
+        
+        // NEW: Critical hit system
+        this.critChance = 0.15; // 15% chance
+        this.lastHitWasCrit = false;
+        
         // Controls
         this.controls = controls;
     }
@@ -45,6 +66,31 @@ class Player {
     update(groundY, opponent) {
         // Update animation frame
         this.animationFrame += this.animationSpeed;
+        
+        // NEW: Handle knockdown state
+        if (this.isKnockedDown) {
+            this.knockdownTime--;
+            if (this.knockdownTime <= 0) {
+                this.isKnockedDown = false;
+                this.getUpFrame = 20; // Getting up animation
+            }
+            this.velocityX *= 0.9; // Slow down while knocked down
+        }
+        
+        // NEW: Handle getting up animation
+        if (this.getUpFrame > 0) {
+            this.getUpFrame--;
+        }
+        
+        // NEW: Handle dash
+        if (this.isDashing) {
+            this.dashFrame++;
+            if (this.dashFrame >= 10) {
+                this.isDashing = false;
+                this.dashFrame = 0;
+                this.velocityX *= 0.5; // Slow down after dash
+            }
+        }
         
         // Apply gravity
         this.velocityY += this.gravity;
@@ -64,7 +110,7 @@ class Player {
         this.x += this.velocityX;
         
         // Friction
-        if (this.isGrounded && !this.isAttacking) {
+        if (this.isGrounded && !this.isAttacking && !this.isDashing) {
             this.velocityX *= 0.85;
         }
         
@@ -73,10 +119,15 @@ class Player {
             this.updateAttack(opponent);
         }
         
+        // NEW: Update projectiles
+        this.updateProjectiles(groundY);
+        
         // Update cooldowns
         if (this.attackCooldown > 0) this.attackCooldown--;
         if (this.hitFlash > 0) this.hitFlash--;
         if (this.hitStun > 0) this.hitStun--;
+        if (this.stoneCooldown > 0) this.stoneCooldown--;
+        if (this.dashCooldown > 0) this.dashCooldown--;
         
         // Walk animation
         if (Math.abs(this.velocityX) > 0.5 && this.isGrounded && !this.isAttacking) {
@@ -139,6 +190,12 @@ class Player {
             baseDamage += (this.attackPowerLevel * 2);
         }
         
+        // NEW: Critical hit chance
+        this.lastHitWasCrit = Math.random() < this.critChance;
+        if (this.lastHitWasCrit) {
+            baseDamage *= 1.5;
+        }
+        
         opponent.takeDamage(baseDamage, this.attackPowerLevel || 0);
         
         // Knockback
@@ -148,6 +205,8 @@ class Player {
         
         // Remove hitbox to prevent multiple hits
         this.hitbox = null;
+        
+        return this.lastHitWasCrit; // Return if it was a crit
     }
     
     takeDamage(amount, attackerPowerLevel = 0) {
@@ -167,21 +226,21 @@ class Player {
     }
     
     moveLeft() {
-        if (!this.isAttacking && this.hitStun <= 0) {
+        if (!this.isAttacking && this.hitStun <= 0 && !this.isKnockedDown && !this.isDashing) {
             this.velocityX = -this.speed;
             this.facing = -1;
         }
     }
     
     moveRight() {
-        if (!this.isAttacking && this.hitStun <= 0) {
+        if (!this.isAttacking && this.hitStun <= 0 && !this.isKnockedDown && !this.isDashing) {
             this.velocityX = this.speed;
             this.facing = 1;
         }
     }
     
     jump() {
-        if (this.isGrounded && !this.isJumping && !this.isAttacking && this.hitStun <= 0) {
+        if (this.isGrounded && !this.isJumping && !this.isAttacking && this.hitStun <= 0 && !this.isKnockedDown) {
             this.velocityY = -this.jumpPower;
             this.isJumping = true;
             this.isGrounded = false;
@@ -189,7 +248,7 @@ class Player {
     }
     
     crouch() {
-        if (this.isGrounded && !this.isAttacking && this.hitStun <= 0) {
+        if (this.isGrounded && !this.isAttacking && this.hitStun <= 0 && !this.isKnockedDown) {
             this.isCrouching = true;
         }
     }
@@ -199,7 +258,7 @@ class Player {
     }
     
     punch() {
-        if (!this.isAttacking && this.attackCooldown <= 0 && this.hitStun <= 0) {
+        if (!this.isAttacking && this.attackCooldown <= 0 && this.hitStun <= 0 && !this.isKnockedDown) {
             this.isAttacking = true;
             this.attackType = 'punch';
             this.attackFrame = 0;
@@ -209,13 +268,104 @@ class Player {
     }
     
     kick() {
-        if (!this.isAttacking && this.attackCooldown <= 0 && this.hitStun <= 0) {
+        if (!this.isAttacking && this.attackCooldown <= 0 && this.hitStun <= 0 && !this.isKnockedDown) {
             this.isAttacking = true;
             this.attackType = 'kick';
             this.attackFrame = 0;
             this.attackCooldown = 30;
             this.velocityX = 0;
         }
+    }
+    
+    // NEW: Throw stone projectile
+    throwStone() {
+        if (this.stoneCooldown <= 0 && this.stoneCount > 0 && !this.isAttacking && !this.isKnockedDown) {
+            const stone = {
+                x: this.x + (this.facing === 1 ? this.width : 0),
+                y: this.y + 30,
+                velocityX: this.facing * 12,
+                velocityY: -3,
+                size: 8,
+                rotation: 0,
+                active: true
+            };
+            this.projectiles.push(stone);
+            this.stoneCount--;
+            this.stoneCooldown = 40;
+        }
+    }
+    
+    // NEW: Update projectiles
+    updateProjectiles(groundY) {
+        for (let i = this.projectiles.length - 1; i >= 0; i--) {
+            const stone = this.projectiles[i];
+            
+            if (!stone.active) {
+                this.projectiles.splice(i, 1);
+                continue;
+            }
+            
+            // Update position
+            stone.x += stone.velocityX;
+            stone.y += stone.velocityY;
+            stone.velocityY += 0.4; // Gravity
+            stone.rotation += 0.3;
+            
+            // Check ground collision
+            if (stone.y >= groundY - stone.size) {
+                stone.active = false;
+            }
+            
+            // Remove if off screen
+            if (stone.x < -50 || stone.x > 850 || stone.y > groundY) {
+                stone.active = false;
+            }
+        }
+    }
+    
+    // NEW: Check if stone hits opponent
+    checkStoneHit(opponent) {
+        for (let stone of this.projectiles) {
+            if (stone.active) {
+                const hit = stone.x < opponent.x + opponent.width &&
+                           stone.x + stone.size > opponent.x &&
+                           stone.y < opponent.y + opponent.height &&
+                           stone.y + stone.size > opponent.y;
+                
+                if (hit) {
+                    stone.active = false;
+                    return stone;
+                }
+            }
+        }
+        return null;
+    }
+    
+    // NEW: Knockdown from stone hit
+    knockDown() {
+        if (!this.isKnockedDown) {
+            this.isKnockedDown = true;
+            this.knockdownTime = 60; // 1 second at 60fps
+            this.velocityY = -8;
+            this.velocityX = -this.facing * 5;
+            this.isAttacking = false;
+            this.attackType = null;
+        }
+    }
+    
+    // NEW: Dash ability
+    dash() {
+        if (this.dashCooldown <= 0 && !this.isDashing && !this.isKnockedDown && this.isGrounded) {
+            this.isDashing = true;
+            this.dashFrame = 0;
+            this.velocityX = this.facing * this.dashSpeed;
+            this.dashCooldown = 60; // 1 second cooldown
+        }
+    }
+    
+    // NEW: Refill stones (called when picking up power-up)
+    refillStones() {
+        this.stoneCount = this.maxStones;
     }
     
     draw(ctx) {
@@ -254,6 +404,18 @@ class Player {
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
         
+        // NEW: Knockdown animation
+        if (this.isKnockedDown || this.getUpFrame > 0) {
+            this.drawKnockedDownPose(ctx, centerX, headY, bodyStartY, bodyEndY);
+            return;
+        }
+        
+        // NEW: Dash effect
+        if (this.isDashing) {
+            this.drawDashPose(ctx, centerX, headY, bodyStartY, bodyEndY);
+            return;
+        }
+        
         // Head
         ctx.beginPath();
         ctx.arc(centerX, headY, 10, 0, Math.PI * 2);
@@ -275,6 +437,79 @@ class Player {
         } else {
             this.drawIdlePose(ctx, centerX, bodyStartY, bodyEndY, crouchOffset);
         }
+    }
+    
+    // NEW: Draw knocked down pose
+    drawKnockedDownPose(ctx, centerX, headY, bodyStartY, bodyEndY) {
+        const groundY = this.y + this.height;
+        
+        if (this.getUpFrame > 0) {
+            // Getting up animation
+            const progress = 1 - (this.getUpFrame / 20);
+            const liftY = (1 - progress) * 30;
+            
+            ctx.beginPath();
+            ctx.arc(centerX - 15, groundY - 20 - liftY, 10, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(centerX - 25, groundY - 10 - liftY);
+            ctx.lineTo(centerX + 5, groundY - 10 - liftY);
+            ctx.stroke();
+        } else {
+            // Fully knocked down
+            ctx.beginPath();
+            ctx.arc(centerX - 15, groundY - 20, 10, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(centerX - 25, groundY - 10);
+            ctx.lineTo(centerX + 5, groundY - 10);
+            ctx.stroke();
+            
+            // Legs
+            ctx.beginPath();
+            ctx.moveTo(centerX - 5, groundY - 10);
+            ctx.lineTo(centerX - 10, groundY - 5);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(centerX + 5, groundY - 10);
+            ctx.lineTo(centerX + 10, groundY - 5);
+            ctx.stroke();
+        }
+    }
+    
+    // NEW: Draw dash pose
+    drawDashPose(ctx, centerX, headY, bodyStartY, bodyEndY) {
+        // Motion blur effect
+        ctx.save();
+        ctx.globalAlpha = 0.5;
+        
+        // Head
+        ctx.beginPath();
+        ctx.arc(centerX, headY, 10, 0, Math.PI * 2);
+        ctx.stroke();
+        
+        // Body leaning forward
+        ctx.beginPath();
+        ctx.moveTo(centerX, bodyStartY);
+        ctx.lineTo(centerX + this.facing * 10, bodyEndY);
+        ctx.stroke();
+        
+        // Arms back
+        ctx.beginPath();
+        ctx.moveTo(centerX, bodyStartY + 10);
+        ctx.lineTo(centerX - this.facing * 20, bodyStartY + 20);
+        ctx.stroke();
+        
+        // Legs running
+        ctx.beginPath();
+        ctx.moveTo(centerX + this.facing * 10, bodyEndY);
+        ctx.lineTo(centerX + this.facing * 20, this.y + this.height);
+        ctx.stroke();
+        
+        ctx.restore();
     }
     
     drawIdlePose(ctx, centerX, bodyStartY, bodyEndY, crouchOffset) {
