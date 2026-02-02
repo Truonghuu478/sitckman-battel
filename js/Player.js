@@ -415,3 +415,8 @@ class Player {
         ctx.stroke();
     }
 }
+
+// Export for Node.js (tests) while maintaining browser compatibility
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = Player;
+}

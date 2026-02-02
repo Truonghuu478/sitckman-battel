@@ -253,3 +253,8 @@ class AIController {
         this.isAggressive = Math.random() < 0.5;
     }
 }
+
+// Export for Node.js (tests) while maintaining browser compatibility
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = AIController;
+}

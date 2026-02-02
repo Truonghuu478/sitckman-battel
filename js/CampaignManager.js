@@ -281,3 +281,8 @@ class CampaignManager {
         return this.playerStats.maxStageReached > this.maxStage;
     }
 }
+
+// Export for Node.js (tests) while maintaining browser compatibility
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = CampaignManager;
+}

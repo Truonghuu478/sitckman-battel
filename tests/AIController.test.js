@@ -1,12 +1,8 @@
 const { describe, test, expect, beforeEach } = require('@jest/globals');
 
 // Load required classes
-const fs = require('fs');
-const path = require('path');
-const playerCode = fs.readFileSync(path.join(__dirname, '../js/Player.js'), 'utf8');
-const aiCode = fs.readFileSync(path.join(__dirname, '../js/AIController.js'), 'utf8');
-eval(playerCode);
-eval(aiCode);
+const Player = require('../js/Player.js');
+const AIController = require('../js/AIController.js');
 
 describe('AIController Class', () => {
     let aiPlayer;

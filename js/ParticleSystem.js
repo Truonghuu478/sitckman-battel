@@ -250,3 +250,16 @@ class MotionTrail {
         return this.alpha <= 0;
     }
 }
+
+// Export for Node.js (tests) while maintaining browser compatibility
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        ParticleSystem,
+        Particle,
+        HitParticle,
+        SparkParticle,
+        DustParticle,
+        Shockwave,
+        MotionTrail
+    };
+}

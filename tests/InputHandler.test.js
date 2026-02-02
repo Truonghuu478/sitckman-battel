@@ -1,12 +1,8 @@
 const { describe, test, expect, beforeEach } = require('@jest/globals');
 
 // Load InputHandler
-const fs = require('fs');
-const path = require('path');
-const inputCode = fs.readFileSync(path.join(__dirname, '../js/InputHandler.js'), 'utf8');
-const playerCode = fs.readFileSync(path.join(__dirname, '../js/Player.js'), 'utf8');
-eval(playerCode);
-eval(inputCode);
+const InputHandler = require('../js/InputHandler.js');
+const Player = require('../js/Player.js');
 
 describe('InputHandler Class', () => {
     let inputHandler;

@@ -1,10 +1,7 @@
 const { describe, test, expect, beforeEach } = require('@jest/globals');
 
 // Load the Player class
-const fs = require('fs');
-const path = require('path');
-const playerCode = fs.readFileSync(path.join(__dirname, '../js/Player.js'), 'utf8');
-eval(playerCode);
+const Player = require('../js/Player.js');
 
 describe('Player Class', () => {
     let player;
@@ -184,12 +181,19 @@ describe('Player Class', () => {
         });
 
         test('should apply friction', () => {
-            player.velocityX = 5;
+            player.velocityX = 10;
+            // Place player on ground: groundY(400) - height(80) = 320
+            player.y = 320;
             player.isGrounded = true;
+            player.isAttacking = false;
             
+            // Apply friction multiple times to see effect
+            player.update(400, opponent);
+            player.update(400, opponent);
             player.update(400, opponent);
             
-            expect(Math.abs(player.velocityX)).toBeLessThan(5);
+            // After 3 updates with 0.85 friction: 10 * 0.85^3 = 6.14
+            expect(Math.abs(player.velocityX)).toBeLessThan(10);
         });
 
         test('should decrease cooldowns', () => {

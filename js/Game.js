@@ -409,7 +409,7 @@ class Game {
         const p1Health = document.getElementById('player1-health');
         const p2Health = document.getElementById('player2-health');
         
-        if (p1Health) {
+        if (p1Health && this.player1) {
             const healthPercent = (this.player1.health / this.player1.maxHealth) * 100;
             p1Health.style.width = healthPercent + '%';
             
@@ -423,7 +423,7 @@ class Game {
             }
         }
         
-        if (p2Health) {
+        if (p2Health && this.player2) {
             const healthPercent = (this.player2.health / this.player2.maxHealth) * 100;
             p2Health.style.width = healthPercent + '%';
             
@@ -489,10 +489,23 @@ class Game {
         }
     }
     
+    updateMenuStats() {
+        const victories = document.getElementById('victories');
+        const menuCoins = document.getElementById('menu-coins');
+        
+        if (victories) {
+            victories.textContent = this.campaignManager.playerStats.victories;
+        }
+        if (menuCoins) {
+            menuCoins.textContent = this.campaignManager.playerStats.coins;
+        }
+    }
+    
     showVictory(reward) {
         const screen = document.getElementById('victoryScreen');
         document.getElementById('rewardAmount').textContent = `+${reward} 💰`;
         document.getElementById('totalCoins').textContent = this.campaignManager.playerStats.coins;
+        this.updateMenuStats();
         screen.classList.remove('hidden');
     }
     
@@ -528,5 +541,98 @@ class Game {
             menu.innerHTML = oldContent;
             document.getElementById('mainMenu').classList.remove('hidden');
         });
+    }
+    
+    showStageSelect() {
+        // Update stage selection UI
+        const stageGrid = document.getElementById('stageGrid');
+        if (stageGrid) {
+            stageGrid.innerHTML = '';
+            const stages = this.campaignManager.stages;
+            const maxReached = this.campaignManager.playerStats.maxStageReached;
+            
+            stages.forEach((stage, index) => {
+                const stageCard = document.createElement('div');
+                stageCard.className = 'stage-card';
+                
+                if (index + 1 > maxReached) {
+                    stageCard.classList.add('locked');
+                }
+                
+                stageCard.innerHTML = `
+                    <div class="stage-number">Stage ${stage.id}</div>
+                    <div class="stage-name">${stage.name}</div>
+                    <div class="stage-reward">💰 ${stage.reward}</div>
+                `;
+                
+                if (index + 1 <= maxReached) {
+                    stageCard.addEventListener('click', () => {
+                        this.campaignManager.currentStage = stage.id;
+                        this.showStoryCutscene(stage);
+                    });
+                }
+                
+                stageGrid.appendChild(stageCard);
+            });
+        }
+    }
+    
+    showStoryCutscene(stage) {
+        const cutscene = document.getElementById('storyCutscene');
+        const storyTitle = document.getElementById('storyTitle');
+        const storyText = document.getElementById('storyText');
+        const enemyName = document.getElementById('enemyName');
+        const enemyDifficulty = document.getElementById('enemyDifficulty');
+        
+        if (storyTitle) storyTitle.textContent = stage.name;
+        if (storyText) storyText.textContent = stage.story;
+        if (enemyName) enemyName.textContent = stage.opponent.name;
+        if (enemyDifficulty) enemyDifficulty.textContent = stage.opponent.difficulty.toUpperCase();
+        
+        document.getElementById('stageSelect').classList.add('hidden');
+        cutscene.classList.remove('hidden');
+    }
+    
+    showUpgradeShop() {
+        // Update shop UI with current stats
+        const stats = this.campaignManager.playerStats;
+        const shopCoins = document.getElementById('shop-coins');
+        
+        if (shopCoins) {
+            shopCoins.textContent = stats.coins;
+        }
+        
+        // Update upgrade levels and costs
+        const upgrades = ['health', 'attack', 'speed', 'defense'];
+        upgrades.forEach(upgrade => {
+            const levelEl = document.getElementById(`${upgrade}-level`);
+            const costEl = document.getElementById(`${upgrade}-cost`);
+            const btnEl = document.getElementById(`upgrade-${upgrade}`);
+            
+            if (levelEl) {
+                levelEl.textContent = stats.upgrades[upgrade === 'health' ? 'maxHealth' : upgrade === 'attack' ? 'attackPower' : upgrade];
+            }
+            
+            const cost = this.campaignManager.getUpgradeCost(upgrade === 'health' ? 'maxHealth' : upgrade === 'attack' ? 'attackPower' : upgrade);
+            if (costEl) {
+                costEl.textContent = cost;
+            }
+            
+            // Setup button handler
+            if (btnEl) {
+                btnEl.onclick = () => {
+                    const upgradeKey = upgrade === 'health' ? 'maxHealth' : upgrade === 'attack' ? 'attackPower' : upgrade;
+                    if (this.campaignManager.purchaseUpgrade(upgradeKey)) {
+                        this.showUpgradeShop(); // Refresh UI
+                    }
+                };
+            }
+        });
+    }
+    
+    resetProgress() {
+        this.campaignManager.reset();
+        this.showUpgradeShop(); // Refresh if shop is open
+        alert('Đã reset toàn bộ tiến trình!');
     }
 }
