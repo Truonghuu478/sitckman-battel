@@ -27,6 +27,9 @@ class Game {
         this.campaignManager = new CampaignManager();
         this.aiController = null;
         
+        // UI Manager (NEW)
+        this.uiManager = new UIManager();
+        
         // Players
         this.player1 = null;
         this.player2 = null;
@@ -47,6 +50,13 @@ class Game {
         // Performance tracking
         this.lastFrameTime = Date.now();
         this.fps = 60;
+        
+        // Combat stats for victory screen
+        this.combatStats = {
+            totalDamage: 0,
+            maxCombo: 0,
+            currentCombo: 0
+        };
     }
     
     startCampaign() {
@@ -239,6 +249,21 @@ class Game {
         // Update health bars
         this.updateHealthBars();
         
+        // Update UI Manager (NEW)
+        if (this.uiManager) {
+            this.uiManager.updateHUD({
+                health: this.player1.health,
+                maxHealth: this.player1.maxHealth,
+                coins: this.campaignManager ? this.campaignManager.totalCoins : 0
+            }, {
+                health: this.player2.health,
+                maxHealth: this.player2.maxHealth
+            }, {
+                timer: this.timeRemaining,
+                stage: this.campaignManager ? this.campaignManager.currentStage + 1 : 1
+            });
+        }
+        
         // Check for knockout
         if (this.player1.health <= 0 || this.player2.health <= 0) {
             this.endGame();
@@ -297,6 +322,23 @@ class Game {
         
         // Camera shake
         this.shakeAmount = attacker.attackType === 'kick' ? 10 : 5;
+        
+        // Track combat stats (NEW)
+        if (attacker === this.player1) {
+            this.combatStats.totalDamage += attacker.damage;
+            this.combatStats.currentCombo++;
+            if (this.combatStats.currentCombo > this.combatStats.maxCombo) {
+                this.combatStats.maxCombo = this.combatStats.currentCombo;
+            }
+            
+            // Show combo notification for high combos
+            if (this.combatStats.currentCombo >= 5 && this.uiManager) {
+                this.uiManager.showComboNotification(this.combatStats.currentCombo);
+            }
+        } else {
+            // Reset combo when player gets hit
+            this.combatStats.currentCombo = 0;
+        }
     }
     
     draw() {
@@ -502,11 +544,53 @@ class Game {
     }
     
     showVictory(reward) {
-        const screen = document.getElementById('victoryScreen');
-        document.getElementById('rewardAmount').textContent = `+${reward} 💰`;
-        document.getElementById('totalCoins').textContent = this.campaignManager.playerStats.coins;
-        this.updateMenuStats();
-        screen.classList.remove('hidden');
+        // Calculate stats for new UI
+        const timeElapsed = this.timeLimit - this.timeRemaining;
+        const stars = this.calculateStars();
+        
+        const stats = {
+            stars: stars,
+            totalDamage: this.combatStats.totalDamage,
+            maxCombo: this.combatStats.maxCombo,
+            completionTime: this.formatTime(timeElapsed),
+            coinsEarned: reward,
+            xpGained: Math.floor(reward * 1.5) // XP based on coins
+        };
+        
+        // Use new UI Manager (NEW)
+        if (this.uiManager) {
+            this.uiManager.showVictoryScreen(stats);
+        } else {
+            // Fallback to old UI
+            const screen = document.getElementById('victoryScreen');
+            document.getElementById('rewardAmount').textContent = `+${reward} 💰`;
+            document.getElementById('totalCoins').textContent = this.campaignManager.playerStats.coins;
+            this.updateMenuStats();
+            screen.classList.remove('hidden');
+        }
+        
+        // Reset combat stats for next battle
+        this.combatStats = {
+            totalDamage: 0,
+            maxCombo: 0,
+            currentCombo: 0
+        };
+    }
+    
+    calculateStars() {
+        // Star rating based on health remaining and time
+        const healthPercent = this.player1.health / this.player1.maxHealth;
+        const timePercent = this.timeRemaining / this.timeLimit;
+        
+        if (healthPercent > 0.7 && timePercent > 0.5) return 3;
+        if (healthPercent > 0.4 && timePercent > 0.3) return 2;
+        return 1;
+    }
+    
+    formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
     }
     
     showDefeat() {
@@ -544,36 +628,21 @@ class Game {
     }
     
     showStageSelect() {
-        // Update stage selection UI
-        const stageGrid = document.getElementById('stageGrid');
-        if (stageGrid) {
-            stageGrid.innerHTML = '';
-            const stages = this.campaignManager.stages;
-            const maxReached = this.campaignManager.playerStats.maxStageReached;
+        // Use UIManager to populate stage selection
+        if (this.uiManager) {
+            const stages = this.campaignManager.stages.map((stage, index) => ({
+                name: stage.name,
+                difficulty: stage.opponent.difficulty === 'easy' ? 'Easy' : 
+                           stage.opponent.difficulty === 'medium' ? 'Normal' : 
+                           stage.opponent.difficulty === 'hard' ? 'Hard' : 'Normal',
+                isBoss: stage.opponent.isBoss || false,
+                locked: (index + 1) > this.campaignManager.playerStats.maxStageReached,
+                stars: this.campaignManager.playerStats.stageStars?.[index + 1] || 0,
+                reward: stage.reward,
+                enemyCount: 1
+            }));
             
-            stages.forEach((stage, index) => {
-                const stageCard = document.createElement('div');
-                stageCard.className = 'stage-card';
-                
-                if (index + 1 > maxReached) {
-                    stageCard.classList.add('locked');
-                }
-                
-                stageCard.innerHTML = `
-                    <div class="stage-number">Stage ${stage.id}</div>
-                    <div class="stage-name">${stage.name}</div>
-                    <div class="stage-reward">💰 ${stage.reward}</div>
-                `;
-                
-                if (index + 1 <= maxReached) {
-                    stageCard.addEventListener('click', () => {
-                        this.campaignManager.currentStage = stage.id;
-                        this.showStoryCutscene(stage);
-                    });
-                }
-                
-                stageGrid.appendChild(stageCard);
-            });
+            this.uiManager.showOverlay('stageSelect', { stages });
         }
     }
     
@@ -594,26 +663,31 @@ class Game {
     }
     
     showUpgradeShop() {
-        // Update shop UI with current stats
-        const stats = this.campaignManager.playerStats;
-        const shopCoins = document.getElementById('shop-coins');
-        
-        if (shopCoins) {
-            shopCoins.textContent = stats.coins;
+        // Use UIManager to update shop UI
+        if (this.uiManager) {
+            const stats = this.campaignManager.playerStats;
+            
+            // Map upgrade stats for UIManager
+            const upgradeStats = {
+                coins: stats.coins,
+                health: stats.upgrades.maxHealth || 0,
+                attack: stats.upgrades.attackPower || 0,
+                speed: stats.upgrades.speed || 0,
+                defense: stats.upgrades.defense || 0
+            };
+            
+            this.uiManager.updateShopUI(upgradeStats);
         }
         
-        // Update upgrade levels and costs
+        // Update upgrade costs and setup button handlers
         const upgrades = ['health', 'attack', 'speed', 'defense'];
         upgrades.forEach(upgrade => {
-            const levelEl = document.getElementById(`${upgrade}-level`);
             const costEl = document.getElementById(`${upgrade}-cost`);
             const btnEl = document.getElementById(`upgrade-${upgrade}`);
             
-            if (levelEl) {
-                levelEl.textContent = stats.upgrades[upgrade === 'health' ? 'maxHealth' : upgrade === 'attack' ? 'attackPower' : upgrade];
-            }
+            const upgradeKey = upgrade === 'health' ? 'maxHealth' : upgrade === 'attack' ? 'attackPower' : upgrade;
+            const cost = this.campaignManager.getUpgradeCost(upgradeKey);
             
-            const cost = this.campaignManager.getUpgradeCost(upgrade === 'health' ? 'maxHealth' : upgrade === 'attack' ? 'attackPower' : upgrade);
             if (costEl) {
                 costEl.textContent = cost;
             }
@@ -621,7 +695,6 @@ class Game {
             // Setup button handler
             if (btnEl) {
                 btnEl.onclick = () => {
-                    const upgradeKey = upgrade === 'health' ? 'maxHealth' : upgrade === 'attack' ? 'attackPower' : upgrade;
                     if (this.campaignManager.purchaseUpgrade(upgradeKey)) {
                         this.showUpgradeShop(); // Refresh UI
                     }

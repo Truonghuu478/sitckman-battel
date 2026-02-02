@@ -28,9 +28,10 @@ window.addEventListener('DOMContentLoaded', () => {
     // Main menu handlers
     if (campaignBtn) {
         campaignBtn.addEventListener('click', () => {
-            mainMenu.classList.add('hidden');
-            stageSelect.classList.remove('hidden');
-            game.showStageSelect();
+            if (game.uiManager) {
+                game.uiManager.hideOverlay('mainMenu');
+                game.showStageSelect();
+            }
         });
     }
     
@@ -43,9 +44,11 @@ window.addEventListener('DOMContentLoaded', () => {
     
     if (shopBtn) {
         shopBtn.addEventListener('click', () => {
-            mainMenu.classList.add('hidden');
-            upgradeShop.classList.remove('hidden');
-            game.showUpgradeShop();
+            if (game.uiManager) {
+                game.uiManager.hideOverlay('mainMenu');
+                game.uiManager.showOverlay('upgradeShop');
+                game.showUpgradeShop();
+            }
         });
     }
     

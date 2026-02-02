@@ -1,0 +1,70 @@
+/* ================================
+   Menu Component Styles
+   ================================ */
+
+.main-menu {
+    background: transparent;
+}
+
+/* Grid pattern background */
+.bg-grid-pattern {
+    background-image: 
+        linear-gradient(to right, #232448 1px, transparent 1px),
+        linear-gradient(to bottom, #232448 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+/* Menu animations */
+@keyframes menuItemEnter {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.menu-item-enter {
+    animation: menuItemEnter 0.5s ease-out forwards;
+}
+
+/* Stats display enhancements */
+.stats-badge {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-full);
+    transition: all var(--transition-base);
+}
+
+.stats-badge:hover {
+    transform: scale(1.05);
+    border-color: var(--color-primary);
+}
+
+/* Campaign button special effects */
+.campaign-button {
+    position: relative;
+    overflow: hidden;
+}
+
+.campaign-button::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, var(--color-primary), var(--color-neon-cyan));
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.campaign-button:hover::after {
+    opacity: 1;
+}

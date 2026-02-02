@@ -1,0 +1,86 @@
+/* ================================
+   CSS Variables - Design System
+   ================================ */
+
+:root {
+    /* Colors - Primary */
+    --color-primary: #6467f2;
+    --color-primary-glow: #8a8dff;
+    --color-primary-dark: #4245f0;
+    
+    /* Colors - Neon Accents */
+    --color-neon-cyan: #05d9e8;
+    --color-neon-pink: #ff2a6d;
+    --color-neon-yellow: #facc15;
+    --color-neon-magenta: #ff00ff;
+    
+    /* Backgrounds */
+    --bg-light: #f6f6f8;
+    --bg-dark: #101122;
+    --bg-darker: #050510;
+    --surface-dark: #1e1f3a;
+    --surface-glass: rgba(22, 23, 45, 0.6);
+    
+    /* Glass Effect */
+    --glass-bg: rgba(30, 31, 58, 0.4);
+    --glass-bg-light: rgba(17, 17, 34, 0.7);
+    --glass-border: rgba(100, 103, 242, 0.2);
+    --glass-border-light: rgba(255, 255, 255, 0.08);
+    
+    /* Shadows - Neon Glows */
+    --shadow-neon-primary: 0 0 20px rgba(100, 103, 242, 0.4), 0 0 40px rgba(100, 103, 242, 0.2);
+    --shadow-neon-cyan: 0 0 20px rgba(5, 217, 232, 0.4), 0 0 40px rgba(5, 217, 232, 0.2);
+    --shadow-neon-pink: 0 0 20px rgba(255, 42, 109, 0.4), 0 0 40px rgba(255, 42, 109, 0.2);
+    --shadow-neon-yellow: 0 0 20px rgba(250, 204, 21, 0.4), 0 0 40px rgba(250, 204, 21, 0.2);
+    
+    /* Text Shadows - Glow */
+    --text-glow-primary: 0 0 10px rgba(100, 103, 242, 0.6), 0 0 20px rgba(100, 103, 242, 0.3);
+    --text-glow-cyan: 0 0 10px rgba(5, 217, 232, 0.7), 0 0 20px rgba(5, 217, 232, 0.5);
+    --text-glow-pink: 0 0 10px rgba(255, 42, 109, 0.7), 0 0 20px rgba(255, 42, 109, 0.5);
+    
+    /* Shadows - Depth */
+    --shadow-deep: 0 15px 40px -10px rgba(0, 0, 0, 0.8);
+    --shadow-card: 0 4px 30px rgba(0, 0, 0, 0.1);
+    
+    /* Typography */
+    --font-display: 'Spline Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: ui-monospace, 'SF Mono', 'Menlo', 'Monaco', monospace;
+    
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-2xl: 3rem;
+    
+    /* Border Radius */
+    --radius-sm: 0.5rem;
+    --radius-md: 1rem;
+    --radius-lg: 1.5rem;
+    --radius-xl: 2rem;
+    --radius-full: 9999px;
+    
+    /* Transitions */
+    --transition-fast: 0.15s ease;
+    --transition-base: 0.3s ease;
+    --transition-slow: 0.6s ease;
+    --transition-smooth: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
+    /* Z-Index Scale */
+    --z-background: 0;
+    --z-content: 10;
+    --z-overlay: 20;
+    --z-modal: 30;
+    --z-tooltip: 40;
+    --z-top: 50;
+}
+
+/* Dark mode adjustments */
+.dark {
+    color-scheme: dark;
+}
+
+html.dark {
+    --bg-light: var(--bg-dark);
+}

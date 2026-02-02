@@ -1,0 +1,147 @@
+/* ================================
+   Card Components
+   ================================ */
+
+/* Stage card with 3D effect */
+.card-3d-wrapper {
+    perspective: 1000px;
+}
+
+.card-3d-inner {
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transform-style: preserve-3d;
+}
+
+.card-3d-wrapper:hover .card-3d-inner {
+    transform: rotateX(5deg) rotateY(-5deg) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+/* Reveal content on hover */
+.reveal-content {
+    transform: translateY(100%);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.card-3d-wrapper:hover .reveal-content {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+/* Upgrade card */
+.upgrade-card {
+    background: var(--glass-bg-light);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    transition: all var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+}
+
+.upgrade-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
+    opacity: 0;
+    transition: opacity var(--transition-base);
+}
+
+.upgrade-card:hover {
+    transform: scale(1.02);
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-neon-primary);
+}
+
+.upgrade-card:hover::before {
+    opacity: 1;
+}
+
+/* Stat card */
+.stat-card {
+    background: var(--glass-bg-light);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-xl);
+    padding: 1.5rem;
+    transition: all var(--transition-base);
+}
+
+.stat-card:hover {
+    background: rgba(50, 51, 103, 0.3);
+    transform: translateY(-5px);
+}
+
+/* Stage select card */
+.stage-card {
+    position: relative;
+    background: var(--glass-bg-light);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: all var(--transition-smooth);
+    cursor: pointer;
+}
+
+.stage-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-neon-primary);
+}
+
+.stage-card.locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.stage-card.locked:hover {
+    transform: none;
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: none;
+}
+
+/* Info card */
+.info-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    transition: all var(--transition-base);
+}
+
+.info-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--color-primary);
+}
+
+/* Card with glow effect */
+.card-glow {
+    position: relative;
+}
+
+.card-glow::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, var(--color-primary), var(--color-neon-cyan), var(--color-neon-pink), var(--color-primary));
+    background-size: 400% 400%;
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity var(--transition-base);
+    animation: gradient 3s ease infinite;
+}
+
+.card-glow:hover::after {
+    opacity: 1;
+}
